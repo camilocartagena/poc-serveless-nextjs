@@ -1,0 +1,33 @@
+{
+  "name": "poc-serveless-nextjs",
+  "version": "1.0.0",
+  "description": "POC",
+  "main": "handler.js",
+  "scripts": {
+    "local": "sls offline --geoloc useast1 --region us-east-1 --stage dev --acct cpi --proyecto ingswf",
+    "deploy": "sls deploy --geoloc useast1 --region us-east-1 --stage dev --acct cpi --proyecto ingswf",
+    "remove": "sls remove --geoloc useast1 --region us-east-1 --stage dev --acct cpi --proyecto ingswf"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camilocartagena/poc-serveless-nextjs.git"
+  },
+  "keywords": [
+    "nextjs",
+    "serveless"
+  ],
+  "author": "camilo cartagena",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/camilocartagena/poc-serveless-nextjs/issues"
+  },
+  "homepage": "https://github.com/camilocartagena/poc-serveless-nextjs#readme",
+  "dependencies": {
+    "moment": "^2.29.1",
+    "serverless-offline": "^8.4.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "serverless": "^2.72.2"
+  }  
+}

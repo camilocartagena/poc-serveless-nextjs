@@ -1,0 +1,110 @@
+service: poc-serveless-nextjs
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-offline
+  
+custom:
+  serverless-offline:
+    noPrependStageInUrl: true
+  allowedHeaders:
+    - Accept
+    - Content-Type
+    - Authorization
+    - app_user_id
+    - app_user_name
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage}
+  region: ${opt:region}
+  timeout: 30
+  environment:
+    SERVICE_TABLE: aws${opt:geoloc}-${opt:stage}${opt:acct}dbo${opt:proyecto}-service
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.SERVICE_TABLE}"
+resources:
+  Resources:
+    ServicesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.SERVICE_TABLE}
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: N
+          - AttributeName: service_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+          - AttributeName: service_id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: timestamp-index
+            KeySchema:
+              - AttributeName: timestamp
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1  
+functions:
+  addService:
+    handler: src/handler.addService
+    events:
+      - http:
+          path: services
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  getService:
+    handler: src/handler.getService
+    events:
+      - http:
+          path: services/{service_id}
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  getServices:
+    handler: src/handler.getServices
+    events:
+      - http:
+          path: services/
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  updateService:
+    handler: src/handler.updateService
+    events:
+      - http:
+          path: services/
+          method: put
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  deleteService:
+    handler: src/handler.deleteService
+    events:
+      - http:
+          path: services/{service_id}
+          method: delete
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
